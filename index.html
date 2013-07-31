@@ -1,0 +1,139 @@
+<html>
+  <head>
+    <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <title>Taste Profile Manager</title>
+  </head>
+  <body>
+  	<a href="#" name="top" class="view-hide"></a>
+    <!--  main body content  -->
+	<div id="wrap">
+		<div class="navbar">
+		  <div class="navbar-inner">
+			<span class="brand">Taste Profile Manager</span>
+		  </div>
+		</div>
+		<div class="container">
+		  <div class="row">
+		  	<div class="span10 offset1">
+		  		<ul class="nav nav-pills">
+		  			<li id="tp-selector-view" class="active tp-selector-view"><a href="#">Set API Key</a></li>
+		  			<li id="tp-list-view" class="tp-list-view"><a href="#">Select Taste Profile</a></li>
+		  			<li id="catalog-contents-view" class="catalog-contents-view"><a href="#">Taste Profile Contents</a></li>
+		  			<li id="create-tp-view" class="create-tp-view"><a href="#">Create New TP</a></li>
+		  			<li>
+		  		</ul>
+		  		<!-- views -->
+		  		<div class="view tp-selector-view form-inline">
+		  		</div>
+		  		<div class="view tp-list-view hide-view">
+		  			<div class="alert alert-error err-tp-list-view">You must first select an API key.</div>
+		  		</div>
+		  		<div class="view catalog-contents-view hide-view">
+		  			<div class="alert alert-error err-catalog-contents-view">You must select an API key and then a specific taste profile.</div>
+		  		</div>
+		  		<div class="view create-tp-view hide-view form-inline">
+		  			<div class="alert alert-error err-create-tp-view">You must select an API key to create a taste profile.</div>
+		  		</div>
+		  		<!-- end views -->
+
+		  	</div>
+		  </div>
+		</div>
+		
+		<!--  templates  -->
+		<script type="underscore-tmpl" id="catalog-item-tmpl">
+			<h3>Taste Profiles</h3>
+				<% for (i=0; i<catalogs.length; i++) { %>
+					<span class="catalog-items">
+						<table>
+							<tr>
+								<td>name:</td><td><strong><%= catalogs[i].name %></strong></td>
+							</tr>
+							<tr>
+								<td>id:</td><td><%= catalogs[i].id %></td>
+							</tr>
+							<tr>
+								<td>num items:</td><td><%= catalogs[i].total %></td>
+							</tr>
+							<tr>
+								<td>created:</td><td><%= catalogs[i].created %></td>
+							</tr>
+							<tr>
+								<td>last modified:</td><td><%= catalogs[i].last_modified %></td>
+							</tr>
+							<tr>
+								<td>type:</td><td><%= catalogs[i].type %></td>
+							</tr>
+							<tr>
+								<td colspan=2 align="right"><button class="btn btn-small btn-success view-tp" id="<%= catalogs[i].id %>">View</button> <button class="btn btn-small btn-danger delete-tp" id="<%= catalogs[i].id %>">Delete</button></td>
+							</tr>
+						</table>
+					</span>
+				<% } %>
+		</script>
+
+		<script type="underscore/template" id="tp-selector-tmpl">
+			<h3>Start Page</h3>
+  			<p>Begin by entering your API Key to see a list of taste profiles associated with your key.</p>
+	  		<input type="text" id="tp-id" placeholder="Enter API Key..."/>
+	  		<button class="btn btn-small btn-primary list-tps">List Taste Profiles</button>
+	  		<br/><br/>
+	  		<div class="alert alert-error hide-view" id="err-tp-selector"></div>
+		</script>
+
+		<script type="underscore/template" id="artist-tmpl">
+			<h3><i><%= name.toUpperCase() %></i> Catalog</h3>
+			<div class="add-artist form-inline">
+				<p>Add artist to taste profile by searching below</p>
+				<input type="text" id="artist"/>
+				<button class="btn btn-small btn-primary" id="add-artist">Search</button>
+				<div id="results">&nbsp;</div>
+			</div>
+			<br/>
+			<% if (items.length) { %>
+				<div class="artist-items">
+					<div class="text-center">
+						<p>Showing artists <b><%= start+1 %></b> through <b><%= start + items.length %></b>:</p>
+						<button class="btn btn-small page page-left"><i class="icon-step-backward"></i></button> &nbsp;
+						<button class="btn btn-small page page-right"><i class="icon-step-forward"></i></button>
+					</div>
+					<ul class="nav nav-pills nav-stacked">
+					  <% for (i=0; i<items.length; i++) { %>
+						<li><%= items[i].artist_name ? items[i].artist_name : items[i].request.artist_name %><i class="icon-remove pull-right" id="<%= items[i].request.item_id %>"></i></li>
+					  <% } %>
+					</ul>
+				</div>
+			<% } else { %>
+				<div class="alert alert-error">It looks like you haven't added any items yet...</div>
+			<% } %>
+		</script>
+
+		<script type="underscore/template" id="add-artist-tmpl">
+			<% if (artists.length) { %>
+				<select id="artist-select">
+					<% for (i=0; i<artists.length; i++) { %>
+						<option name="<%= artists[i].id %>"><%= artists[i].name %></option>
+					<% } %>
+				</select>
+				<button class="btn btn-small btn-success" id="plus-artist">+</button>
+			<% } else { %>
+				<div class="alert alert-error">We were unable to find any artists by that name.</div>
+			<% } %>
+		</script>
+
+		<script type="underscore/template" id="create-tp-tmpl">
+			<h3>Create New Taste Profile</h3>
+  			<input type="text" id="tp-name" placeholder="Enter TP Name..."/>
+  			<button class="btn btn-small btn-success" id="create-tp">Create TP</button>
+  			<div class="alert alert-error hide-view" id="err-create-tp"></div>
+		</script>
+	
+    <!--  load scripts  -->
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.1/underscore-min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+    <script src="js/echonest.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>
